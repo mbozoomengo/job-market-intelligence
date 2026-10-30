@@ -7,7 +7,7 @@
 ![Power Query](https://img.shields.io/badge/Power%20Query-M-123B38)
 ![Modèle](https://img.shields.io/badge/mod%C3%A8le-sch%C3%A9ma%20en%20%C3%A9toile-80CBC4)
 
-**Auteur :** William Mbozo'o — Data Analyst& Engineer
+**Auteur :** William Mbozo'o — Data Analyst & Engineer
 
 ---
 
