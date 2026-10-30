@@ -171,7 +171,7 @@ erDiagram
 
 **Palette** : fond blanc, cartes à bordure douce, bandeau vert nuit, teintes teal / aqua pour les données, **ambre pour l'élément à regarder**. Barre latérale de navigation, titre dynamique sous chaque titre de page, 4 cartes KPI par page.
 
-> 📸 Déposez vos captures (PNG 1920 × 1080) dans [`docs/screenshots/`](docs/screenshots) en gardant les noms ci-dessous.
+
 
 <table>
   <tr>
