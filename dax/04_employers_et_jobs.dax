@@ -1,0 +1,80 @@
+// ============================================================================
+// Job Market Intelligence – Cameroun · Dossier de mesures : 04 Employers & jobs
+// Table hôte : _Measures · Les mesures se référencent entre elles par [Nom].
+// ============================================================================
+
+// Identified Employer Offers   [format: #,0]
+// Ads whose URL names an employer.
+[Identified Employer Offers] =
+    CALCULATE ( [Offers], Fact_Offres[EmployerSlug] <> "unknown" )
+
+// Employers Identified   [format: #,0]
+// Distinct employers identified from ad URLs.
+[Employers Identified] =
+    CALCULATE ( DISTINCTCOUNT ( Fact_Offres[EmployerSlug] ), Fact_Offres[EmployerSlug] <> "unknown" )
+
+// Employer Coverage %   [format: 0%]
+// Share of ads with an identified employer.
+[Employer Coverage %] =
+    DIVIDE ( [Identified Employer Offers], [Offers] )
+
+// Offers per Employer   [format: 0.0]
+// Average ads per identified employer.
+[Offers per Employer] =
+    DIVIDE ( [Identified Employer Offers], [Employers Identified] )
+
+// Employer Rank   [format: #,0]
+// Dense rank of the employer by ads in the selection.
+[Employer Rank] =
+    IF (
+        HASONEVALUE ( Dim_Employer[EmployerName] ),
+        RANKX ( ALLSELECTED ( Dim_Employer[EmployerName] ), [Offers], , DESC, DENSE )
+    )
+
+// Top Employer
+// Employer(s) with the most ads; ties are listed together.
+[Top Employer] =
+    CONCATENATEX ( TOPN ( 1, VALUES ( Dim_Employer[EmployerName] ), [Offers], DESC ), Dim_Employer[EmployerName], ", " )
+
+// Top Employer Offers   [format: #,0]
+// Ads posted by the top employer.
+[Top Employer Offers] =
+    MAXX ( VALUES ( Dim_Employer[EmployerName] ), [Offers] )
+
+// Top Employer Type
+// Employer type with the most ads.
+[Top Employer Type] =
+    CONCATENATEX ( TOPN ( 1, VALUES ( Dim_Employer[EmployerType] ), [Offers], DESC ), Dim_Employer[EmployerType], ", " )
+
+// Top Employer Type Share %   [format: 0%]
+// Share of ads posted by the top employer type.
+[Top Employer Type Share %] =
+    DIVIDE ( MAXX ( VALUES ( Dim_Employer[EmployerType] ), [Offers] ), [Offers] )
+
+// Employer Type Share %   [format: 0%]
+// Share of ads for the employer type in context.
+[Employer Type Share %] =
+    DIVIDE ( [Offers], CALCULATE ( [Offers], REMOVEFILTERS ( Dim_Employer ) ) )
+
+// Top Job Family
+// Job family (Job group only) with the most ads.
+[Top Job Family] =
+    CONCATENATEX (
+        TOPN ( 1, CALCULATETABLE ( VALUES ( Dim_JobFamily[JobFamily] ), Dim_JobFamily[FamilyGroup] = "Job" ), [Offers], DESC ),
+        Dim_JobFamily[JobFamily], ", "
+    )
+
+// Job Family Share %   [format: 0%]
+// Share of ads for the job family in context.
+[Job Family Share %] =
+    DIVIDE ( [Offers], CALCULATE ( [Offers], REMOVEFILTERS ( Dim_JobFamily ) ) )
+
+// Multi-position Ads   [format: #,0]
+// Ads announcing more than one position.
+[Multi-position Ads] =
+    CALCULATE ( [Offers], Fact_Offres[PositionsCount] > 1 )
+
+// Top 2 Ads Positions Share %   [format: 0%]
+// Share of announced positions coming from the 2 largest ads (concentration).
+[Top 2 Ads Positions Share %] =
+    DIVIDE ( SUMX ( TOPN ( 2, VALUES ( Fact_Offres[OfferKey] ), [Positions], DESC ), [Positions] ), [Positions] )

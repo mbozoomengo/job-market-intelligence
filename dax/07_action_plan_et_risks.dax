@@ -1,0 +1,81 @@
+// ============================================================================
+// Job Market Intelligence – Cameroun · Dossier de mesures : 07 Action plan & risks
+// Table hôte : _Measures · Les mesures se référencent entre elles par [Nom].
+// ============================================================================
+
+// Coverage Gain (Ads)   [format: #,0]
+// Ads that become usable when full ads are captured (P1).
+[Coverage Gain (Ads)] =
+    [Missing Description Offers]
+
+// Manual Review Hours   [format: 0.0" h]
+// Hours of manual review per collection at [Minutes per Ad] (what-if).
+[Manual Review Hours] =
+    DIVIDE ( [Offers] * [Minutes per Ad], 60 )
+
+// Time Saved per Refresh (h)   [format: 0.0" h]
+// Hours saved per collection by the automated refresh (P2).
+[Time Saved per Refresh (h)] =
+    [Manual Review Hours] - DIVIDE ( [Automated Refresh Minutes], 60 )
+
+// Time Saved per Year (h)   [format: #,0" h]
+// Hours saved per year with weekly collections.
+[Time Saved per Year (h)] =
+    [Time Saved per Refresh (h)] * 52
+
+// Snapshots Collected   [format: #,0]
+// Collections loaded so far, ignoring date filters.
+[Snapshots Collected] =
+    CALCULATE (
+        DISTINCTCOUNT ( Fact_Offres[CollectionDate] ),
+        REMOVEFILTERS ( Fact_Offres[CollectionDate] ),
+        REMOVEFILTERS ( Dim_Date )
+    )
+
+// Weeks to First Trend   [format: #,0]
+// Weekly collections still needed before a trend can be shown.
+[Weeks to First Trend] =
+    MAX ( 0, [Snapshots for Trend] - [Snapshots Collected] )
+
+// Priority Gain Label
+// Expected gain of the action-plan priority in context.
+[Priority Gain Label] =
+    SWITCH (
+        SELECTEDVALUE ( Action_Plan[PriorityID] ),
+        "P1", FORMAT ( [Description Coverage %], "0%", "en-GB" ) & " → 100% coverage (+" & [Coverage Gain (Ads)] & " ads)",
+        "P2", FORMAT ( [Manual Review Hours], "0.0", "en-GB" ) & " h → " & [Automated Refresh Minutes] & " min per refresh",
+        "P3", [Portals Covered] & " → " & [Target Portals] & " portals"
+    )
+
+// Risks in Cell
+// Risk IDs in the heat-map cell (impact × likelihood); a space keeps empty cells visible.
+[Risks in Cell] =
+    VAR _impact = SELECTEDVALUE ( Risk_Impact[ImpactNo] )
+    VAR _likelihood = SELECTEDVALUE ( Risk_Likelihood[LikelihoodNo] )
+    VAR _risks =
+        CONCATENATEX (
+            FILTER ( Risk_Register, Risk_Register[Impact] = _impact && Risk_Register[Likelihood] = _likelihood ),
+            Risk_Register[RiskID], "  ", Risk_Register[RiskID], ASC
+        )
+    RETURN IF ( _risks = "", " ", _risks )
+
+// Risk Cell Score   [format: #,0]
+// Impact × likelihood score of the heat-map cell (1-9).
+[Risk Cell Score] =
+    SELECTEDVALUE ( Risk_Impact[ImpactNo] ) * SELECTEDVALUE ( Risk_Likelihood[LikelihoodNo] )
+
+// Risk Score   [format: #,0]
+// Impact × likelihood score of the risk in context (1-9).
+[Risk Score] =
+    MAX ( Risk_Register[Impact] ) * MAX ( Risk_Register[Likelihood] )
+
+// Risk Level
+// Critical (9) / High (6+) / Medium (3+) / Low.
+[Risk Level] =
+    SWITCH (
+        TRUE (),
+        [Risk Score] >= 9, "Critical",
+        [Risk Score] >= 6, "High",
+        [Risk Score] >= 3, "Medium",
+        "Low"
+    )

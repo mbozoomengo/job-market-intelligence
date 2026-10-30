@@ -1,0 +1,69 @@
+// ============================================================================
+// Job Market Intelligence – Cameroun · Dossier de mesures : 01 Base
+// Table hôte : _Measures · Les mesures se référencent entre elles par [Nom].
+// ============================================================================
+
+// Offers   [format: #,0]
+// Unique ads (one row per link per collection, after deduplication).
+[Offers] =
+    COUNTROWS ( Fact_Offres )
+
+// Raw Rows   [format: #,0]
+// Rows in the raw extract before deduplication.
+[Raw Rows] =
+    SUM ( Fact_Offres[RawRowCount] )
+
+// Duplicate Rows   [format: #,0]
+// Raw rows removed by deduplication on the link.
+[Duplicate Rows] =
+    [Raw Rows] - [Offers]
+
+// Duplicate Rate %   [format: 0%]
+// Share of raw rows that were duplicates.
+[Duplicate Rate %] =
+    DIVIDE ( [Duplicate Rows], [Raw Rows] )
+
+// Described Offers   [format: #,0]
+// Unique ads with a description. Denominator of location, date, contract and pay KPIs.
+[Described Offers] =
+    CALCULATE ( [Offers], Fact_Offres[HasDescription] = TRUE () )
+
+// Missing Description Offers   [format: #,0]
+// Unique ads whose description is empty.
+[Missing Description Offers] =
+    [Offers] - [Described Offers]
+
+// Description Coverage %   [format: 0%]
+// Share of unique ads with a description.
+[Description Coverage %] =
+    DIVIDE ( [Described Offers], [Offers] )
+
+// Missing Description %   [format: 0%]
+// Share of unique ads without a description.
+[Missing Description %] =
+    DIVIDE ( [Missing Description Offers], [Offers] )
+
+// Job Offers   [format: #,0]
+// Ads that are genuine job offers (excludes tenders, training, promotions, spontaneous calls).
+[Job Offers] =
+    CALCULATE ( [Offers], Dim_OfferNature[IsJobOffer] = TRUE () )
+
+// Positions   [format: #,0]
+// Positions announced in ad titles (0 for non-job ads).
+[Positions] =
+    SUM ( Fact_Offres[PositionsCount] )
+
+// Positions per Job Offer   [format: 0.0]
+// Average positions announced per job ad.
+[Positions per Job Offer] =
+    DIVIDE ( [Positions], [Job Offers] )
+
+// Median Positions per Ad   [format: #,0]
+// Median positions per ad, ads with at least one position.
+[Median Positions per Ad] =
+    MEDIANX ( FILTER ( Fact_Offres, Fact_Offres[PositionsCount] > 0 ), Fact_Offres[PositionsCount] )
+
+// Share of Total %   [format: 0%]
+// Share of the ads visible in the current selection.
+[Share of Total %] =
+    DIVIDE ( [Offers], CALCULATE ( [Offers], ALLSELECTED () ) )

@@ -1,0 +1,14 @@
+JobFamilyCode,JobFamily,FamilyGroup,SortOrder
+FIN,Finance & audit,Job,1
+SAL,Sales & marketing,Job,2
+HRA,HR & administration,Job,3
+ENG,Engineering & technical,Job,4
+MUL,Multi-profile calls & internships,Job,5
+HUM,Humanitarian & health,Job,6
+HOS,Hospitality & services,Job,7
+EDU,Education & research,Job,8
+AGR,Agriculture & environment,Job,9
+LOG,Logistics & transport,Job,10
+SPO,Spontaneous applications,Other,11
+NJB,Non-job ads,Other,12
+UNC,Unclassified,Other,13

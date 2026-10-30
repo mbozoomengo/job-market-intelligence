@@ -1,0 +1,83 @@
+// ============================================================================
+// Job Market Intelligence – Cameroun · Dossier de mesures : 03 Territory
+// Table hôte : _Measures · Les mesures se référencent entre elles par [Nom].
+// ============================================================================
+
+// Located Offers   [format: #,0]
+// Ads with a known location (city, nationwide or international).
+[Located Offers] =
+    CALCULATE ( [Offers], NOT Dim_Location[LocationCode] IN { "NONE", "UNMAPPED" } )
+
+// Top 2 Cities Share %   [format: 0%]
+// Share of located ads in the two busiest cities.
+[Top 2 Cities Share %] =
+    DIVIDE (
+        SUMX (
+            TOPN ( 2, CALCULATETABLE ( VALUES ( Dim_Location[City] ), Dim_Location[Scope] = "City" ), [Offers], DESC ),
+            [Offers]
+        ),
+        [Located Offers]
+    )
+
+// Top 2 Cities Label
+// Names of the two busiest cities, e.g. Douala + Yaoundé.
+[Top 2 Cities Label] =
+    CONCATENATEX (
+        TOPN ( 2, CALCULATETABLE ( VALUES ( Dim_Location[City] ), Dim_Location[Scope] = "City" ), [Offers], DESC ),
+        Dim_Location[City], " + ", [Offers], DESC
+    )
+
+// Nationwide Share %   [format: 0%]
+// Share of located ads open to all Cameroon.
+[Nationwide Share %] =
+    DIVIDE ( CALCULATE ( [Offers], Dim_Location[Scope] = "National" ), [Located Offers] )
+
+// International Share %   [format: 0%]
+// Share of located ads based abroad.
+[International Share %] =
+    DIVIDE ( CALCULATE ( [Offers], Dim_Location[Scope] = "International" ), [Located Offers] )
+
+// Other Cities Share %   [format: 0%]
+// Share of located ads in cities other than the top 2 (excludes nationwide and abroad).
+[Other Cities Share %] =
+    VAR _located = [Located Offers]
+    VAR _top2 =
+        SUMX (
+            TOPN ( 2, CALCULATETABLE ( VALUES ( Dim_Location[City] ), Dim_Location[Scope] = "City" ), [Offers], DESC ),
+            [Offers]
+        )
+    VAR _national = CALCULATE ( [Offers], Dim_Location[Scope] = "National" )
+    VAR _international = CALCULATE ( [Offers], Dim_Location[Scope] = "International" )
+    RETURN
+        DIVIDE ( _located - _top2 - _national - _international, _located )
+
+// Location Share %   [format: 0%]
+// Share of all located ads for the location in context.
+[Location Share %] =
+    DIVIDE ( [Offers], CALCULATE ( [Located Offers], REMOVEFILTERS ( Dim_Location ) ) )
+
+// Regions with No Offer   [format: #,0]
+// Cameroon regions (out of 10) with no ad in the selection.
+[Regions with No Offer] =
+    COUNTROWS (
+        FILTER (
+            CALCULATETABLE ( VALUES ( Dim_Location[Region] ), Dim_Location[Scope] = "City", REMOVEFILTERS ( Dim_Location ) ),
+            COALESCE ( [Offers], 0 ) = 0
+        )
+    )
+
+// Regions with No Offer List
+// Names of the regions with no ad, alphabetical.
+[Regions with No Offer List] =
+    CONCATENATEX (
+        FILTER (
+            CALCULATETABLE ( VALUES ( Dim_Location[Region] ), Dim_Location[Scope] = "City", REMOVEFILTERS ( Dim_Location ) ),
+            COALESCE ( [Offers], 0 ) = 0
+        ),
+        Dim_Location[Region], ", ", Dim_Location[Region], ASC
+    )
+
+// Offers (Map)   [format: #,0]
+// Ads with zero instead of blank, so regions with no ad stay on the map.
+[Offers (Map)] =
+    COALESCE ( [Offers], 0 )

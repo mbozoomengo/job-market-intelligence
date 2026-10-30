@@ -1,0 +1,54 @@
+// ============================================================================
+// Job Market Intelligence – Cameroun · Dossier de mesures : 00 Targets & parameters
+// Table hôte : _Measures · Les mesures se référencent entre elles par [Nom].
+// ============================================================================
+
+// Target Description Coverage   [format: 0%]
+// Target share of unique ads with a description.
+[Target Description Coverage] =
+    0.90
+
+// Target Employer Coverage   [format: 0%]
+// Target share of ads with an identified employer.
+[Target Employer Coverage] =
+    0.90
+
+// Target Job Family Coverage   [format: 0%]
+// Target share of ads classified in a job family (not Unclassified).
+[Target Job Family Coverage] =
+    0.95
+
+// Target Date Parsed   [format: 0%]
+// Target share of described ads with a parsed publication date.
+[Target Date Parsed] =
+    1
+
+// Recent Window Days   [format: #,0]
+// Age threshold in days for an ad to count as recent.
+[Recent Window Days] =
+    7
+
+// Automated Refresh Minutes   [format: #,0]
+// Target duration in minutes of an automated refresh (action plan P2).
+[Automated Refresh Minutes] =
+    2
+
+// Snapshots for Trend   [format: #,0]
+// Number of weekly snapshots needed before showing a trend.
+[Snapshots for Trend] =
+    12
+
+// Target Portals   [format: #,0]
+// Target number of job portals collected (action plan P3).
+[Target Portals] =
+    3
+
+// Portals Covered   [format: #,0]
+// Portals currently collected. Replace by DISTINCTCOUNT ( Fact_Offres[Source] ) once a Source column exists.
+[Portals Covered] =
+    1
+
+// Minutes per Ad   [format: #,0]
+// What-if: manual review minutes per ad, from the Param_MinutesPerAd slicer (default 3).
+[Minutes per Ad] =
+    SELECTEDVALUE ( Param_MinutesPerAd[Value], 3 )

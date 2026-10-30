@@ -1,0 +1,159 @@
+// ============================================================================
+// Job Market Intelligence – Cameroun · Dossier de mesures : 06 Data quality
+// Table hôte : _Measures · Les mesures se référencent entre elles par [Nom].
+// ============================================================================
+
+// Duplicate OfferKeys   [format: #,0]
+// Duplicate keys left in the model after deduplication (must be 0).
+[Duplicate OfferKeys] =
+    [Offers] - DISTINCTCOUNT ( Fact_Offres[OfferKey] )
+
+// Located Coverage %   [format: 0%]
+// Share of ads with a known location.
+[Located Coverage %] =
+    DIVIDE ( [Located Offers], [Offers] )
+
+// Date Coverage %   [format: 0%]
+// Share of ads with a publication date.
+[Date Coverage %] =
+    DIVIDE ( [Dated Offers], [Offers] )
+
+// Contract Coverage %   [format: 0%]
+// Share of ads whose nature/contract type is known.
+[Contract Coverage %] =
+    DIVIDE ( CALCULATE ( [Offers], Dim_OfferNature[OfferNatureCode] <> "JOB_UNK" ), [Offers] )
+
+// Salary Coverage %   [format: 0%]
+// Share of ads with a salary field.
+[Salary Coverage %] =
+    DIVIDE ( CALCULATE ( [Offers], Dim_SalaryStatus[SalaryStatusCode] <> "MISSING" ), [Offers] )
+
+// Job Family Coverage %   [format: 0%]
+// Share of ads classified in a job family.
+[Job Family Coverage %] =
+    DIVIDE ( CALCULATE ( [Offers], Dim_JobFamily[JobFamilyCode] <> "UNC" ), [Offers] )
+
+// Date Parse Rate %   [format: 0%]
+// Share of described ads whose publication date was parsed.
+[Date Parse Rate %] =
+    DIVIDE ( [Dated Offers], [Described Offers] )
+
+// Field Extraction Rate %   [format: 0%]
+// Average coverage of the 6 extracted fields (location, date, contract, salary, employer, job family).
+[Field Extraction Rate %] =
+    AVERAGEX (
+        {
+            [Located Coverage %], [Date Coverage %], [Contract Coverage %],
+            [Salary Coverage %], [Employer Coverage %], [Job Family Coverage %]
+        },
+        [Value]
+    )
+
+// Fully Usable Offers   [format: #,0]
+// Described ads with an identified employer.
+[Fully Usable Offers] =
+    CALCULATE ( [Described Offers], Fact_Offres[EmployerSlug] <> "unknown" )
+
+// Funnel Value   [format: #,0]
+// Value of the QA funnel stage in context.
+[Funnel Value] =
+    SWITCH (
+        SELECTEDVALUE ( QA_Funnel[StageID] ),
+        1, [Raw Rows],
+        2, [Offers],
+        3, [Described Offers],
+        4, [Fully Usable Offers]
+    )
+
+// Funnel Drop   [format: #,0]
+// Rows lost between the previous funnel stage and this one.
+[Funnel Drop] =
+    VAR _stage = SELECTEDVALUE ( QA_Funnel[StageID] )
+    VAR _previous =
+        CALCULATE ( [Funnel Value], REMOVEFILTERS ( QA_Funnel ), QA_Funnel[StageID] = _stage - 1 )
+    RETURN IF ( _stage > 1, _previous - [Funnel Value] )
+
+// QA Actual
+// Actual value of the QA check in context (count or rate).
+[QA Actual] =
+    SWITCH (
+        SELECTEDVALUE ( QA_Checks[CheckID] ),
+        1, [Offers],
+        2, [Duplicate OfferKeys],
+        3, [Description Coverage %],
+        4, [Employer Coverage %],
+        5, [Job Family Coverage %],
+        6, [Date Parse Rate %]
+    )
+
+// QA Target
+// Target of the QA check in context.
+[QA Target] =
+    SWITCH (
+        SELECTEDVALUE ( QA_Checks[CheckID] ),
+        1, CALCULATE ( DISTINCTCOUNT ( Fact_Offres[OfferURL] ) ),
+        2, 0,
+        3, [Target Description Coverage],
+        4, [Target Employer Coverage],
+        5, [Target Job Family Coverage],
+        6, [Target Date Parsed]
+    )
+
+// QA Pass
+// TRUE when the QA check meets its target.
+[QA Pass] =
+    SWITCH (
+        SELECTEDVALUE ( QA_Checks[CheckID] ),
+        1, [QA Actual] = [QA Target],
+        2, [QA Actual] = 0,
+        [QA Actual] >= [QA Target]
+    )
+
+// QA Status
+// Pass / Fail label of the QA check.
+[QA Status] =
+    IF ( [QA Pass], "Pass", "Fail" )
+
+// QA Actual Label
+// Formatted actual value of the QA check.
+[QA Actual Label] =
+    IF (
+        SELECTEDVALUE ( QA_Checks[CheckID] ) IN { 1, 2 },
+        FORMAT ( [QA Actual], "0" ),
+        FORMAT ( [QA Actual], "0%" )
+    )
+
+// QA Target Label
+// Formatted target of the QA check.
+[QA Target Label] =
+    SWITCH (
+        SELECTEDVALUE ( QA_Checks[CheckID] ),
+        1, FORMAT ( [QA Target], "0" ),
+        2, "0",
+        "≥ " & FORMAT ( [QA Target], "0%" )
+    )
+
+// Checks Passed   [format: #,0]
+// Number of QA checks meeting their target.
+[Checks Passed] =
+    SUMX ( QA_Checks, IF ( [QA Pass], 1, 0 ) )
+
+// Checks Passed Label
+// e.g. '4 / 6 checks passed'.
+[Checks Passed Label] =
+    [Checks Passed] & " / " & COUNTROWS ( QA_Checks ) & " checks passed"
+
+// Audit Duplicate Rate %   [format: 0%]
+// Duplicate rate per collection, from Audit_Collection.
+[Audit Duplicate Rate %] =
+    DIVIDE ( SUM ( Audit_Collection[RawRows] ) - SUM ( Audit_Collection[UniqueAds] ), SUM ( Audit_Collection[RawRows] ) )
+
+// Audit Description Coverage %   [format: 0%]
+// Description coverage per collection, from Audit_Collection.
+[Audit Description Coverage %] =
+    DIVIDE ( SUM ( Audit_Collection[AdsWithDescription] ), SUM ( Audit_Collection[UniqueAds] ) )
+
+// Collections Count   [format: #,0]
+// Number of collections (extraction runs) loaded.
+[Collections Count] =
+    DISTINCTCOUNT ( Audit_Collection[CollectionDate] )

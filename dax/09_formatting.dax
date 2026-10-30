@@ -1,0 +1,69 @@
+// ============================================================================
+// Job Market Intelligence – Cameroun · Dossier de mesures : 09 Formatting
+// Table hôte : _Measures · Les mesures se référencent entre elles par [Nom].
+// ============================================================================
+
+// Color Recency
+// Daily columns: Amber = peak (>= 75% of max), Teal = last 7 days, Aqua = older.
+[Color Recency] =
+    VAR _day = SELECTEDVALUE ( Dim_Date[Date] )
+    VAR _ref = [Reference Date]
+    VAR _isPeak = [Offers] >= CALCULATE ( [Peak Day Offers], ALLSELECTED ( Dim_Date ) ) * 0.75
+    RETURN
+        SWITCH (
+            TRUE (),
+            _isPeak, "#FFB433",
+            _day > _ref - [Recent Window Days], "#80CBC4",
+            "#B4EBE6"
+        )
+
+// Color Delta
+// Deep teal for non-negative week-on-week change, Alert for negative.
+[Color Delta] =
+    IF ( [WoW Change] >= 0, "#2C7A72", "#B5651D" )
+
+// Color Scope
+// Amber for locations not tied to one city (nationwide, abroad), Teal for cities.
+[Color Scope] =
+    IF ( SELECTEDVALUE ( Dim_Location[Scope] ) IN { "National", "International" }, "#FFB433", "#80CBC4" )
+
+// Color Top Item
+// Amber for the top employer, Teal for the others.
+[Color Top Item] =
+    IF ( [Offers] = MAXX ( ALLSELECTED ( Dim_Employer[EmployerName] ), [Offers] ), "#FFB433", "#80CBC4" )
+
+// Color QA
+// Deep teal for Pass, Alert for Fail.
+[Color QA] =
+    IF ( [QA Pass], "#2C7A72", "#B5651D" )
+
+// Color Risk Cell
+// Heat-map cell background by impact × likelihood score.
+[Color Risk Cell] =
+    SWITCH (
+        TRUE (),
+        [Risk Cell Score] >= 9, "#FFB433",
+        [Risk Cell Score] >= 6, "#FFD98A",
+        [Risk Cell Score] >= 3, "#D3EFEB",
+        "#F4F8F7"
+    )
+
+// Color Risk Level
+// Font colour of the risk level in the register.
+[Color Risk Level] =
+    SWITCH ( [Risk Level], "Critical", "#B5651D", "High", "#B5651D", "Medium", "#2C7A72", "#5A6B68" )
+
+// Color KPI Accent
+// Default KPI accent (Teal); the headline KPI uses Amber #FFB433.
+[Color KPI Accent] =
+    "#80CBC4"
+
+// Color Top Employer Type
+// Amber for the employer type with the most ads, Teal for the others.
+[Color Top Employer Type] =
+    IF ( [Offers] = MAXX ( ALLSELECTED ( Dim_Employer[EmployerType] ), [Offers] ), "#FFB433", "#80CBC4" )
+
+// Color Family Group
+// Teal for job families, warm grey for the Other group (spontaneous, non-job, unclassified).
+[Color Family Group] =
+    IF ( SELECTEDVALUE ( Dim_JobFamily[FamilyGroup] ) = "Other", "#C9C2B0", "#80CBC4" )

@@ -1,0 +1,226 @@
+// ============================================================================
+// Job Market Intelligence – Cameroun · Mesures DAX stratégiques (sélection commentée)
+// Le jeu de données est un instantané (une collecte) : les comparaisons temporelles
+// sont donc des fenêtres glissantes 7 jours / semaine précédente, et non un YoY/YTD.
+// Le jeu complet (151 mesures) est dans les autres fichiers de ce dossier.
+// ============================================================================
+
+// Offers   [format: #,0]
+// Unique ads (one row per link per collection, after deduplication).
+[Offers] =
+    COUNTROWS ( Fact_Offres )
+
+// Raw Rows   [format: #,0]
+// Rows in the raw extract before deduplication.
+[Raw Rows] =
+    SUM ( Fact_Offres[RawRowCount] )
+
+// Duplicate Rate %   [format: 0%]
+// Share of raw rows that were duplicates.
+[Duplicate Rate %] =
+    DIVIDE ( [Duplicate Rows], [Raw Rows] )
+
+// Described Offers   [format: #,0]
+// Unique ads with a description. Denominator of location, date, contract and pay KPIs.
+[Described Offers] =
+    CALCULATE ( [Offers], Fact_Offres[HasDescription] = TRUE () )
+
+// Description Coverage %   [format: 0%]
+// Share of unique ads with a description.
+[Description Coverage %] =
+    DIVIDE ( [Described Offers], [Offers] )
+
+// Positions   [format: #,0]
+// Positions announced in ad titles (0 for non-job ads).
+[Positions] =
+    SUM ( Fact_Offres[PositionsCount] )
+
+// Recent Offers   [format: #,0]
+// Dated ads younger than [Recent Window Days] at the collection date.
+[Recent Offers] =
+    VAR _window = [Recent Window Days]
+    RETURN
+        CALCULATE (
+            [Offers],
+            NOT ISBLANK ( Fact_Offres[DaysSincePublication] ),
+            Fact_Offres[DaysSincePublication] < _window
+        )
+
+// Recent Share %   [format: 0%]
+// Share of dated ads that are recent (base: dated ads).
+[Recent Share %] =
+    DIVIDE ( [Recent Offers], [Dated Offers] )
+
+// Offers Last 7 Days   [format: #,0]
+// Ads published in the 7 days ending on the reference date.
+[Offers Last 7 Days] =
+    VAR _ref = [Reference Date]
+    RETURN CALCULATE ( [Offers], DATESBETWEEN ( Dim_Date[Date], _ref - 6, _ref ) )
+
+// Offers Prior 7 Days   [format: #,0]
+// Ads published in the 7 days before the last 7 days.
+[Offers Prior 7 Days] =
+    VAR _ref = [Reference Date]
+    RETURN CALCULATE ( [Offers], DATESBETWEEN ( Dim_Date[Date], _ref - 13, _ref - 7 ) )
+
+// 7-Day Change %   [format: 0%]
+// Change of the last 7 days vs the prior 7 days.
+[7-Day Change %] =
+    DIVIDE ( [Offers Last 7 Days] - [Offers Prior 7 Days], [Offers Prior 7 Days] )
+
+// Offers Previous Week   [format: #,0]
+// Ads in the previous week (use with Dim_Date[YearWeek] on the axis).
+[Offers Previous Week] =
+    CALCULATE ( [Offers], DATEADD ( Dim_Date[Date], -7, DAY ) )
+
+// WoW Change %   [format: +0%;-0%;0%]
+// Week-on-week change in ads, %.
+[WoW Change %] =
+    DIVIDE ( [WoW Change], [Offers Previous Week] )
+
+// Peak Day
+// Day(s) with the most ads published (undated ads excluded).
+[Peak Day] =
+    VAR _top = TOPN ( 1, FILTER ( DISTINCT ( Dim_Date[Date] ), [Offers] > 0 ), [Offers], DESC )
+    RETURN CONCATENATEX ( _top, FORMAT ( Dim_Date[Date], "d mmm yyyy", "en-GB" ), ", " )
+
+// Top 3 Weekdays Share %   [format: 0%]
+// Share of dated ads published on the 3 busiest weekdays.
+[Top 3 Weekdays Share %] =
+    DIVIDE (
+        SUMX ( TOPN ( 3, DISTINCT ( Dim_Date[Weekday] ), [Offers], DESC ), [Offers] ),
+        [Dated Offers]
+    )
+
+// Located Offers   [format: #,0]
+// Ads with a known location (city, nationwide or international).
+[Located Offers] =
+    CALCULATE ( [Offers], NOT Dim_Location[LocationCode] IN { "NONE", "UNMAPPED" } )
+
+// Top 2 Cities Share %   [format: 0%]
+// Share of located ads in the two busiest cities.
+[Top 2 Cities Share %] =
+    DIVIDE (
+        SUMX (
+            TOPN ( 2, CALCULATETABLE ( VALUES ( Dim_Location[City] ), Dim_Location[Scope] = "City" ), [Offers], DESC ),
+            [Offers]
+        ),
+        [Located Offers]
+    )
+
+// Regions with No Offer   [format: #,0]
+// Cameroon regions (out of 10) with no ad in the selection.
+[Regions with No Offer] =
+    COUNTROWS (
+        FILTER (
+            CALCULATETABLE ( VALUES ( Dim_Location[Region] ), Dim_Location[Scope] = "City", REMOVEFILTERS ( Dim_Location ) ),
+            COALESCE ( [Offers], 0 ) = 0
+        )
+    )
+
+// Employer Coverage %   [format: 0%]
+// Share of ads with an identified employer.
+[Employer Coverage %] =
+    DIVIDE ( [Identified Employer Offers], [Offers] )
+
+// Top 2 Ads Positions Share %   [format: 0%]
+// Share of announced positions coming from the 2 largest ads (concentration).
+[Top 2 Ads Positions Share %] =
+    DIVIDE ( SUMX ( TOPN ( 2, VALUES ( Fact_Offres[OfferKey] ), [Positions], DESC ), [Positions] ), [Positions] )
+
+// Full-time Share %   [format: 0%]
+// Share of described ads that are full-time jobs.
+[Full-time Share %] =
+    DIVIDE ( CALCULATE ( [Described Offers], Dim_OfferNature[OfferNatureCode] = "FT" ), [Described Offers] )
+
+// Negotiable Share %   [format: 0%]
+// Share of described ads whose salary is 'à négocier'.
+[Negotiable Share %] =
+    DIVIDE ( CALCULATE ( [Described Offers], Dim_SalaryStatus[SalaryStatusCode] = "NEG" ), [Described Offers] )
+
+// Salary Transparency Index %   [format: 0%]
+// Share of described job ads that state a pay figure.
+[Salary Transparency Index %] =
+    DIVIDE ( [Pay Stated Job Offers], [Described Job Offers] )
+
+// Field Extraction Rate %   [format: 0%]
+// Average coverage of the 6 extracted fields (location, date, contract, salary, employer, job family).
+[Field Extraction Rate %] =
+    AVERAGEX (
+        {
+            [Located Coverage %], [Date Coverage %], [Contract Coverage %],
+            [Salary Coverage %], [Employer Coverage %], [Job Family Coverage %]
+        },
+        [Value]
+    )
+
+// Funnel Value   [format: #,0]
+// Value of the QA funnel stage in context.
+[Funnel Value] =
+    SWITCH (
+        SELECTEDVALUE ( QA_Funnel[StageID] ),
+        1, [Raw Rows],
+        2, [Offers],
+        3, [Described Offers],
+        4, [Fully Usable Offers]
+    )
+
+// Funnel Drop   [format: #,0]
+// Rows lost between the previous funnel stage and this one.
+[Funnel Drop] =
+    VAR _stage = SELECTEDVALUE ( QA_Funnel[StageID] )
+    VAR _previous =
+        CALCULATE ( [Funnel Value], REMOVEFILTERS ( QA_Funnel ), QA_Funnel[StageID] = _stage - 1 )
+    RETURN IF ( _stage > 1, _previous - [Funnel Value] )
+
+// QA Actual
+// Actual value of the QA check in context (count or rate).
+[QA Actual] =
+    SWITCH (
+        SELECTEDVALUE ( QA_Checks[CheckID] ),
+        1, [Offers],
+        2, [Duplicate OfferKeys],
+        3, [Description Coverage %],
+        4, [Employer Coverage %],
+        5, [Job Family Coverage %],
+        6, [Date Parse Rate %]
+    )
+
+// QA Pass
+// TRUE when the QA check meets its target.
+[QA Pass] =
+    SWITCH (
+        SELECTEDVALUE ( QA_Checks[CheckID] ),
+        1, [QA Actual] = [QA Target],
+        2, [QA Actual] = 0,
+        [QA Actual] >= [QA Target]
+    )
+
+// Time Saved per Refresh (h)   [format: 0.0" h]
+// Hours saved per collection by the automated refresh (P2).
+[Time Saved per Refresh (h)] =
+    [Manual Review Hours] - DIVIDE ( [Automated Refresh Minutes], 60 )
+
+// Time Saved per Year (h)   [format: #,0" h]
+// Hours saved per year with weekly collections.
+[Time Saved per Year (h)] =
+    [Time Saved per Refresh (h)] * 52
+
+// Risk Score   [format: #,0]
+// Impact × likelihood score of the risk in context (1-9).
+[Risk Score] =
+    MAX ( Risk_Register[Impact] ) * MAX ( Risk_Register[Likelihood] )
+
+// Color Recency
+// Daily columns: Amber = peak (>= 75% of max), Teal = last 7 days, Aqua = older.
+[Color Recency] =
+    VAR _day = SELECTEDVALUE ( Dim_Date[Date] )
+    VAR _ref = [Reference Date]
+    VAR _isPeak = [Offers] >= CALCULATE ( [Peak Day Offers], ALLSELECTED ( Dim_Date ) ) * 0.75
+    RETURN
+        SWITCH (
+            TRUE (),
+            _isPeak, "#FFB433",
+            _day > _ref - [Recent Window Days], "#80CBC4",
+            "#B4EBE6"
+        )

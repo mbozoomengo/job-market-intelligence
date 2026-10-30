@@ -1,0 +1,75 @@
+Priority,Keyword,JobFamilyCode
+1,request for,NJB
+1,appel d’offres,NJB
+1,bourses,NJB
+1,assurances,NJB
+1,vip,NJB
+2,spontan,SPO
+3,compta,FIN
+3,audit,FIN
+3,financ,FIN
+3,caissi,FIN
+3,contrôleur,FIN
+3,portfolio,FIN
+3,expert,FIN
+4,commerci,SAL
+4,marketing,SAL
+4,conseiller,SAL
+4,apporteur,SAL
+4,téléop,SAL
+4,digital,SAL
+4,médias,SAL
+4,chef d’agence,SAL
+4,rayonniste,SAL
+5,ressources humaines,HRA
+5, rh,HRA
+5,administratif,HRA
+5,assistant(e) de direction,HRA
+5,assistante de direction,HRA
+5,executive assistant,HRA
+5,réception,HRA
+5,services généraux,HRA
+5,intendance,HRA
+6,logisti,LOG
+6,driver,LOG
+6,magasin,LOG
+6,conducteur,LOG
+6,chauffeur,LOG
+7,cuisine,HOS
+7,restauration,HOS
+7,boucherie,HOS
+7,esthéti,HOS
+7,coiff,HOS
+7,entretien,HOS
+7,librairie,HOS
+8,epidemio,HUM
+8,gestionnaire de cas,HUM
+8,sécurité,HUM
+8,meal,HUM
+8,ong,HUM
+8,unicef,HUM
+9,chercheur,EDU
+9,professeur,EDU
+9,surveillant,EDU
+9,discipline,EDU
+9,culturel,EDU
+10,agricol,AGR
+10,conservation,AGR
+10,forest,AGR
+10,paysag,AGR
+11,génie civil,ENG
+11,batiment,ENG
+11,bâtiment,ENG
+11,ingénieur,ENG
+11,technicien,ENG
+11,qhse,ENG
+11,technique,ENG
+11,facilities,ENG
+11,chef de projet,ENG
+11,exploitation,ENG
+12,stagi,MUL
+12,stage,MUL
+12,profils,MUL
+12,postes,MUL
+12,divers,MUL
+12,gestionnaire,MUL

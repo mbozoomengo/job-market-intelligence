@@ -1,0 +1,15 @@
+LocationCode,City,Region,Scope,Country,Latitude,Longitude
+douala,Douala,Littoral,City,Cameroon,4.05,9.70
+yaounde,Yaoundé,Centre,City,Cameroon,3.87,11.52
+buea,Buea,Sud-Ouest,City,Cameroon,4.16,9.24
+bamenda,Bamenda,Nord-Ouest,City,Cameroon,5.96,10.15
+bafoussam,Bafoussam,Ouest,City,Cameroon,5.48,10.42
+ngaoundere,Ngaoundéré,Adamaoua,City,Cameroon,7.32,13.58
+garoua,Garoua,Nord,City,Cameroon,9.30,13.40
+maroua,Maroua,Extrême-Nord,City,Cameroon,10.59,14.32
+bertoua,Bertoua,Est,City,Cameroon,4.58,13.68
+ebolowa,Ebolowa,Sud,City,Cameroon,2.90,11.15
+limbe,Limbe,Sud-Ouest,City,Cameroon,4.02,9.20
+kribi,Kribi,Sud,City,Cameroon,2.94,9.91
+tout,Tout le Cameroun,National,National,Cameroon,,
+emploi,International,International,International,,,

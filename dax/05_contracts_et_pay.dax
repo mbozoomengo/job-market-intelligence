@@ -1,0 +1,59 @@
+// ============================================================================
+// Job Market Intelligence – Cameroun · Dossier de mesures : 05 Contracts & pay
+// Table hôte : _Measures · Les mesures se référencent entre elles par [Nom].
+// ============================================================================
+
+// Nature Share %   [format: 0%]
+// Share of described ads for the offer nature in context.
+[Nature Share %] =
+    DIVIDE ( [Described Offers], CALCULATE ( [Described Offers], REMOVEFILTERS ( Dim_OfferNature ) ) )
+
+// Full-time Share %   [format: 0%]
+// Share of described ads that are full-time jobs.
+[Full-time Share %] =
+    DIVIDE ( CALCULATE ( [Described Offers], Dim_OfferNature[OfferNatureCode] = "FT" ), [Described Offers] )
+
+// Internship Share %   [format: 0%]
+// Share of described ads that are internships.
+[Internship Share %] =
+    DIVIDE ( CALCULATE ( [Described Offers], Dim_OfferNature[OfferNatureCode] = "INT" ), [Described Offers] )
+
+// Non-job Share %   [format: 0%]
+// Share of described ads that are not jobs (tenders, training, promotions, other).
+[Non-job Share %] =
+    DIVIDE ( CALCULATE ( [Described Offers], Dim_OfferNature[OfferGroup] = "Non-job" ), [Described Offers] )
+
+// Spontaneous Calls   [format: #,0]
+// Calls for spontaneous applications.
+[Spontaneous Calls] =
+    CALCULATE ( [Offers], Dim_OfferNature[OfferNatureCode] = "SPO" )
+
+// Negotiable Share %   [format: 0%]
+// Share of described ads whose salary is 'à négocier'.
+[Negotiable Share %] =
+    DIVIDE ( CALCULATE ( [Described Offers], Dim_SalaryStatus[SalaryStatusCode] = "NEG" ), [Described Offers] )
+
+// Salary Status Share %   [format: 0%]
+// Share of described ads for the salary status in context.
+[Salary Status Share %] =
+    DIVIDE ( [Described Offers], CALCULATE ( [Described Offers], REMOVEFILTERS ( Dim_SalaryStatus ) ) )
+
+// Described Job Offers   [format: #,0]
+// Described ads that are genuine job offers.
+[Described Job Offers] =
+    CALCULATE ( [Described Offers], Dim_OfferNature[IsJobOffer] = TRUE () )
+
+// Pay Stated Job Offers   [format: #,0]
+// Described job ads that state a pay figure.
+[Pay Stated Job Offers] =
+    CALCULATE ( [Described Job Offers], Dim_SalaryStatus[IsPayStated] = TRUE () )
+
+// Salary Transparency Index %   [format: 0%]
+// Share of described job ads that state a pay figure.
+[Salary Transparency Index %] =
+    DIVIDE ( [Pay Stated Job Offers], [Described Job Offers] )
+
+// Gauge Max   [format: 0%]
+// Maximum of percentage gauges (100%).
+[Gauge Max] =
+    1

@@ -1,0 +1,68 @@
+// ============================================================================
+// Tables calculées de support (déconnectées du schéma en étoile)
+// _Measures : table hôte des mesures · QA_* : contrôles qualité · Risk_* / Action_Plan :
+// plan d'action et risques · Param_MinutesPerAd : paramètre what-if
+// ============================================================================
+
+// Action_Plan
+Action_Plan =
+    DATATABLE (
+        "PriorityID", STRING, "Title", STRING, "Action", STRING, "Order", INTEGER,
+        {
+            { "P1", "Capture full ads", "Scrape each detail page; deduplicate on link at load", 1 },
+            { "P2", "Collect weekly", "Stamp a collection date; keep every snapshot", 2 },
+            { "P3", "Widen sources", "Add 2 portals; keep the employer reference table current", 3 }
+        }
+    )
+
+// Param_MinutesPerAd
+Param_MinutesPerAd =
+    GENERATESERIES ( 1, 10, 1 )
+
+// QA_Checks
+QA_Checks =
+    DATATABLE (
+        "CheckID", INTEGER, "Check", STRING,
+        {
+            { 1, "Unique ads (link key)" },
+            { 2, "Duplicates in model" },
+            { 3, "Description coverage" },
+            { 4, "Employer identified" },
+            { 5, "Job family classified" },
+            { 6, "Publication date parsed" }
+        }
+    )
+
+// QA_Funnel
+QA_Funnel =
+    DATATABLE (
+        "StageID", INTEGER, "Stage", STRING,
+        { { 1, "Raw rows" }, { 2, "Unique ads" }, { 3, "With description" }, { 4, "Fully usable" } }
+    )
+
+// Risk_Impact
+Risk_Impact =
+    DATATABLE ( "ImpactNo", INTEGER, "Impact", STRING, "ImpactOrder", INTEGER, { { 3, "High", 1 }, { 2, "Medium", 2 }, { 1, "Low", 3 } } )
+
+// Risk_Likelihood
+Risk_Likelihood =
+    DATATABLE ( "LikelihoodNo", INTEGER, "Likelihood", STRING, { { 1, "Low" }, { 2, "Medium" }, { 3, "High" } } )
+
+// Risk_Register
+Risk_Register =
+    DATATABLE (
+        "RiskID", STRING, "Risk", STRING, "Impact", INTEGER, "Likelihood", INTEGER,
+        "Mitigation", STRING, "Priority", STRING,
+        {
+            { "R1", "Single source (one portal)", 3, 3, "State the limit; add 2 portals", "P3" },
+            { "R2", "Ads without description", 3, 3, "Show coverage; scrape detail pages", "P1" },
+            { "R3", "Site layout change breaks extraction", 3, 2, "Parameterised rules + QA at each refresh", "P1" },
+            { "R4", "Hiring seasonality", 2, 3, "Weekly snapshots; no annual claims", "P2" },
+            { "R5", "Keyword misclassification", 2, 2, "Review dictionary + override table", "P1" },
+            { "R6", "Data-use compliance", 3, 1, "Public data only; source cited", "–" }
+        }
+    )
+
+// _Measures
+_Measures =
+    DATATABLE ( "Hide", INTEGER, { { 1 } } )

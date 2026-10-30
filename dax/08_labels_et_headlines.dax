@@ -1,0 +1,175 @@
+// ============================================================================
+// Job Market Intelligence – Cameroun · Dossier de mesures : 08 Labels & headlines
+// Table hôte : _Measures · Les mesures se référencent entre elles par [Nom].
+// ============================================================================
+
+// Last Refresh Label
+// Sidebar: date of the latest collection.
+[Last Refresh Label] =
+    "Data as of " & FORMAT ( [Reference Date], "d mmm yyyy", "en-GB" )
+
+// Period Label
+// Publication period covered by the selection.
+[Period Label] =
+    "Ads published " & FORMAT ( [First Publication], "d mmm", "en-GB" ) & " – " & FORMAT ( [Last Publication], "d mmm yyyy", "en-GB" )
+
+// Base Label
+// Subtitle for description-dependent visuals.
+[Base Label] =
+    "Base: " & [Described Offers] & " described ads of " & [Offers]
+
+// Region Filter Label
+// Regions selected in the slicer, or 'All regions'.
+[Region Filter Label] =
+    IF (
+        ISFILTERED ( Dim_Location[Region] ),
+        CONCATENATEX ( VALUES ( Dim_Location[Region] ), Dim_Location[Region], ", " ),
+        "All regions"
+    )
+
+// Headline Overview
+// Page 00 dynamic headline.
+[Headline Overview] =
+    [Offers] & " unique ads · " & FORMAT ( [Positions], "#,0", "en-GB" ) & " positions · " & FORMAT ( [Top 2 Cities Share %], "0%", "en-GB" ) & " in " & [Top 2 Cities Label]
+
+// Headline Pace
+// Page 01 dynamic headline.
+[Headline Pace] =
+    FORMAT ( [Recent Share %], "0%" ) & " of dated ads are under " & [Recent Window Days] & " days old; " & FORMAT ( [Top 3 Weekdays Share %], "0%" ) & " land on " & [Top 3 Weekdays Label]
+
+// Headline Territory
+// Page 02 dynamic headline.
+[Headline Territory] =
+    FORMAT ( [Top 2 Cities Share %], "0%" ) & " of located ads sit in " & [Top 2 Cities Label] & "; " & [Regions with No Offer] & " regions have none"
+
+// Headline Employers
+// Page 03 dynamic headline.
+[Headline Employers] =
+    [Top Employer Type] & " post " & FORMAT ( [Top Employer Type Share %], "0%" ) & " of ads; " & [Top Job Family] & " leads the job mix"
+
+// Headline Contracts
+// Page 04 dynamic headline.
+[Headline Contracts] =
+    FORMAT ( [Full-time Share %], "0%" ) & " of described ads are full-time, yet " & FORMAT ( [Negotiable Share %], "0%" ) & " hide the salary"
+
+// Headline Quality
+// Page 05 dynamic headline.
+[Headline Quality] =
+    FORMAT ( [Duplicate Rate %], "0%" ) & " of raw rows are duplicates; " & FORMAT ( [Missing Description %], "0%" ) & " of ads lack a description"
+
+// Headline Action
+// Page 06 dynamic headline.
+[Headline Action] =
+    "3 priorities: coverage to 100%, refresh from " & FORMAT ( [Manual Review Hours], "0.0", "en-GB" ) & " h to " & [Automated Refresh Minutes] & " min, " & [Target Portals] & " portals"
+
+// Badge 7-Day
+// KPI badge: 7-day change with arrow.
+[Badge 7-Day] =
+    VAR _change = [7-Day Change %]
+    RETURN
+        IF (
+            ISBLANK ( _change ),
+            BLANK (),
+            IF ( _change >= 0, "▲ ", "▼ " ) & FORMAT ( ABS ( _change ), "0%" ) & " vs prior 7 days"
+        )
+
+// Badge Target (Coverage)
+// KPI badge: description coverage vs target.
+[Badge Target (Coverage)] =
+    IF (
+        [Description Coverage %] >= [Target Description Coverage],
+        "▲ on target",
+        "▼ target " & FORMAT ( [Target Description Coverage], "0%" )
+    )
+
+// --- Sous-dossier : 08 Labels & headlines\KPI lines ---
+
+// KPI Line Raw Rows
+// Page 00 card 'Unique ads'.
+[KPI Line Raw Rows] =
+    FORMAT ( [Raw Rows], "#,0", "en-GB" ) & " raw rows"
+
+// KPI Line Multi-position Ads
+// Page 00 card 'Open positions'.
+[KPI Line Multi-position Ads] =
+    FORMAT ( [Multi-position Ads], "#,0" ) & " multi-post ads"
+
+// KPI Line Dated Offers
+// Page 01 card 'Unique ads'.
+[KPI Line Dated Offers] =
+    FORMAT ( [Dated Offers], "#,0" ) & " with a date"
+
+// KPI Line Recent Offers
+// Page 01 card 'Under 7 days'.
+[KPI Line Recent Offers] =
+    FORMAT ( [Recent Offers], "#,0" ) & " of " & FORMAT ( [Dated Offers], "#,0" )
+
+// KPI Line International
+// Page 02 card 'Open nationwide'.
+[KPI Line International] =
+    "+ " & FORMAT ( [International Share %], "0%" ) & " abroad"
+
+// KPI Line Employer Coverage
+// Page 03 card 'Employers identified'.
+[KPI Line Employer Coverage] =
+    FORMAT ( [Employer Coverage %], "0%" ) & " of ads name one"
+
+// KPI Line Positions
+// Page 03 card 'Open positions'.
+[KPI Line Positions] =
+    FORMAT ( [Positions per Job Offer], "0.0", "en-GB" ) & " per job ad · median " & FORMAT ( [Median Positions per Ad], "0", "en-GB" )
+
+// KPI Line Concentration
+// Page 03 card 'Concentration'.
+[KPI Line Concentration] =
+    "of positions come from 2 ads"
+
+// KPI Line Top Employer Offers
+// Page 03 'Top employer' card.
+[KPI Line Top Employer Offers] =
+    FORMAT ( [Top Employer Offers], "#,0" ) & " ads"
+
+// KPI Line Spontaneous
+// Page 04 card 'Not a job'.
+[KPI Line Spontaneous] =
+    FORMAT ( [Spontaneous Calls], "#,0" ) & " spontaneous calls"
+
+// KPI Line Negotiable
+// Page 04 card 'Salary negotiable'.
+[KPI Line Negotiable] =
+    "“à négocier”"
+
+// KPI Line Pay Stated
+// Page 04 card 'Salary transparency'.
+[KPI Line Pay Stated] =
+    FORMAT ( [Pay Stated Job Offers], "#,0" ) & " of " & FORMAT ( [Described Job Offers], "#,0" ) & " job ads"
+
+// KPI Line Unique Ads
+// Page 05 card 'Raw rows'.
+[KPI Line Unique Ads] =
+    FORMAT ( [Offers], "#,0" ) & " unique ads"
+
+// KPI Line Duplicates Removed
+// Page 05 card 'Duplicate rate'.
+[KPI Line Duplicates Removed] =
+    FORMAT ( [Duplicate Rows], "#,0" ) & " rows removed"
+
+// KPI Line Coverage Gain
+// Page 06 card 'Ads made usable (P1)'.
+[KPI Line Coverage Gain] =
+    "+" & FORMAT ( [Missing Description %], "0%" ) & " coverage"
+
+// KPI Line Time Saved per Year
+// Page 06 card 'Time saved per refresh'.
+[KPI Line Time Saved per Year] =
+    FORMAT ( [Time Saved per Year (h)], "#,0", "en-GB" ) & " h per year"
+
+// KPI Line Snapshots
+// Page 06 card 'Weeks to first trend'.
+[KPI Line Snapshots] =
+    FORMAT ( [Snapshots Collected], "#,0" ) & " of " & FORMAT ( [Snapshots for Trend], "#,0" ) & " snapshots"
+
+// KPI Line Target Portals
+// Page 06 card 'Portals covered'.
+[KPI Line Target Portals] =
+    "target " & FORMAT ( [Target Portals], "#,0" )

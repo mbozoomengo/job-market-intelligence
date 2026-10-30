@@ -1,0 +1,10 @@
+OfferNatureCode,OfferNature,OfferGroup,IsJobOffer,SortOrder
+FT,Full-time job,Job,TRUE,1
+INT,Internship,Job,TRUE,2
+TMP,Temporary job,Job,TRUE,3
+JOB_UNK,Job – contract unknown,Job,TRUE,4
+SPO,Spontaneous application,Spontaneous,FALSE,5
+TND,Tender / RFQ / RFP,Non-job,FALSE,6
+TRN,Training / scholarship,Non-job,FALSE,7
+PRO,Promotion / service ad,Non-job,FALSE,8
+OTH,Other,Non-job,FALSE,9

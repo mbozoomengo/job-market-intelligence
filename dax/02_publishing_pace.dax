@@ -1,0 +1,111 @@
+// ============================================================================
+// Job Market Intelligence – Cameroun · Dossier de mesures : 02 Publishing pace
+// Table hôte : _Measures · Les mesures se référencent entre elles par [Nom].
+// ============================================================================
+
+// Dated Offers   [format: #,0]
+// Unique ads with a parsed publication date.
+[Dated Offers] =
+    CALCULATE ( [Offers], NOT ISBLANK ( Fact_Offres[PublicationDate] ) )
+
+// Reference Date   [format: d mmm yyyy]
+// Latest collection date: the 'today' used for recency and 7-day windows.
+[Reference Date] =
+    CALCULATE ( MAX ( Fact_Offres[CollectionDate] ), REMOVEFILTERS ( Dim_Date ) )
+
+// First Publication   [format: d mmm yyyy]
+// Earliest publication date in the selection.
+[First Publication] =
+    CALCULATE ( MIN ( Fact_Offres[PublicationDate] ) )
+
+// Last Publication   [format: d mmm yyyy]
+// Latest publication date in the selection.
+[Last Publication] =
+    CALCULATE ( MAX ( Fact_Offres[PublicationDate] ) )
+
+// Recent Offers   [format: #,0]
+// Dated ads younger than [Recent Window Days] at the collection date.
+[Recent Offers] =
+    VAR _window = [Recent Window Days]
+    RETURN
+        CALCULATE (
+            [Offers],
+            NOT ISBLANK ( Fact_Offres[DaysSincePublication] ),
+            Fact_Offres[DaysSincePublication] < _window
+        )
+
+// Recent Share %   [format: 0%]
+// Share of dated ads that are recent (base: dated ads).
+[Recent Share %] =
+    DIVIDE ( [Recent Offers], [Dated Offers] )
+
+// Active Days   [format: #,0]
+// Days with at least one published ad (undated ads excluded).
+[Active Days] =
+    COUNTROWS ( FILTER ( DISTINCT ( Dim_Date[Date] ), [Offers] > 0 ) )
+
+// Offers per Active Day   [format: 0.0]
+// Average dated ads per day that had at least one ad.
+[Offers per Active Day] =
+    DIVIDE ( [Dated Offers], [Active Days] )
+
+// Offers Last 7 Days   [format: #,0]
+// Ads published in the 7 days ending on the reference date.
+[Offers Last 7 Days] =
+    VAR _ref = [Reference Date]
+    RETURN CALCULATE ( [Offers], DATESBETWEEN ( Dim_Date[Date], _ref - 6, _ref ) )
+
+// Offers Prior 7 Days   [format: #,0]
+// Ads published in the 7 days before the last 7 days.
+[Offers Prior 7 Days] =
+    VAR _ref = [Reference Date]
+    RETURN CALCULATE ( [Offers], DATESBETWEEN ( Dim_Date[Date], _ref - 13, _ref - 7 ) )
+
+// 7-Day Change %   [format: 0%]
+// Change of the last 7 days vs the prior 7 days.
+[7-Day Change %] =
+    DIVIDE ( [Offers Last 7 Days] - [Offers Prior 7 Days], [Offers Prior 7 Days] )
+
+// 7-Day Multiple   [format: ×"0.0]
+// Last 7 days as a multiple of the prior 7 days.
+[7-Day Multiple] =
+    DIVIDE ( [Offers Last 7 Days], [Offers Prior 7 Days] )
+
+// Offers Previous Week   [format: #,0]
+// Ads in the previous week (use with Dim_Date[YearWeek] on the axis).
+[Offers Previous Week] =
+    CALCULATE ( [Offers], DATEADD ( Dim_Date[Date], -7, DAY ) )
+
+// WoW Change   [format: +#,0;-#,0;0]
+// Week-on-week change in ads.
+[WoW Change] =
+    [Offers] - [Offers Previous Week]
+
+// WoW Change %   [format: +0%;-0%;0%]
+// Week-on-week change in ads, %.
+[WoW Change %] =
+    DIVIDE ( [WoW Change], [Offers Previous Week] )
+
+// Peak Day Offers   [format: #,0]
+// Highest number of ads published on a single day (undated ads excluded).
+[Peak Day Offers] =
+    MAXX ( DISTINCT ( Dim_Date[Date] ), [Offers] )
+
+// Peak Day
+// Day(s) with the most ads published (undated ads excluded).
+[Peak Day] =
+    VAR _top = TOPN ( 1, FILTER ( DISTINCT ( Dim_Date[Date] ), [Offers] > 0 ), [Offers], DESC )
+    RETURN CONCATENATEX ( _top, FORMAT ( Dim_Date[Date], "d mmm yyyy", "en-GB" ), ", " )
+
+// Top 3 Weekdays Share %   [format: 0%]
+// Share of dated ads published on the 3 busiest weekdays.
+[Top 3 Weekdays Share %] =
+    DIVIDE (
+        SUMX ( TOPN ( 3, DISTINCT ( Dim_Date[Weekday] ), [Offers], DESC ), [Offers] ),
+        [Dated Offers]
+    )
+
+// Top 3 Weekdays Label
+// Names of the 3 busiest weekdays, busiest first.
+[Top 3 Weekdays Label] =
+    CONCATENATEX ( TOPN ( 3, DISTINCT ( Dim_Date[Weekday] ), [Offers], DESC ), Dim_Date[Weekday], ", ", [Offers], DESC )

@@ -1,0 +1,8 @@
+SalaryStatusCode,SalaryStatus,IsPayStated,SortOrder
+NEG,Negotiable (à négocier),FALSE,1
+AMT,Pay figure stated,TRUE,2
+FEE,Fee charged to the reader,FALSE,3
+UNP,Unpaid,FALSE,4
+GRID,Civil-service grid,FALSE,5
+NA,Not applicable,FALSE,6
+MISSING,Description absente,FALSE,7
