@@ -52,3 +52,12 @@ __pycache__/
 .vscode/
 .idea/
 .claude/
+
+# ---------------------------------------------------------------------------
+# Retirés du dépôt public (conservés en local uniquement)
+# ---------------------------------------------------------------------------
+Job_Market_Intelligence_Cameroon.Report/
+Job_Market_Intelligence_Cameroon.SemanticModel/
+Job_Market_Intelligence_Cameroon.pbip
+_brief/
+_build/
