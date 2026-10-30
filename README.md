@@ -216,7 +216,7 @@ Les données proviennent d'**annonces d'emploi publiques** ; aucune donnée de c
 
 ---
 
-*Projet réalisé à des fins de démonstration (portfolio) : modélisation en étoile, DAX, Power Query et storytelling visuel.*
+*Projet réalisé à des fins de démonstration : modélisation en étoile, DAX, Power Query et storytelling visuel.*
 
 ---
 
