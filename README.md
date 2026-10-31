@@ -2,8 +2,15 @@
 
 > Tableau de bord Power BI et pipeline de données pour lire le marché de l'emploi camerounais à partir d'une source ouverte, avec la fiabilité de chaque indicateur affichée.
 
+---
+
+## 👤 À propos
+
 **Auteur : William Mbozo'o** — Ingénieur en systèmes d'information (Data / BI, Product Owner), Yaoundé.
-[CV (PDF)](./CV_William_Mbozoo.pdf) · [Portfolio](https://william-mbozoo.me) · [LinkedIn](#contact)
+
+📲 [WhatsApp](https://wa.me/237691932723) · 🌐 [Portfolio](https://www.william-mbozoo.me/data-engineer) · 💼 [LinkedIn](https://www.linkedin.com/in/william-mbozoo) · 🐙 [GitHub](https://github.com/mbozoomengo)
+
+---
 
 ---
 
