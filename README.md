@@ -17,8 +17,7 @@
 7. [Données et éthique](#données-et-éthique)
 8. [Limites et suite](#limites-et-suite)
 9. [Démo et reproduction](#démo-et-reproduction)
-10. [Transparence sur l'usage de l'IA](#transparence-sur-lusage-de-lia)
-11. [Contact](#contact)
+10. [Contact](#contact)
 
 ---
 
@@ -105,9 +104,6 @@ Techniques mobilisées : `VAR`, `CALCULATE`, `REMOVEFILTERS`, `ALLSELECTED`, `DA
 - **Démo** : lien en ligne ci-dessus et captures dans [`docs/screenshots/`](./docs/screenshots).
 - **Fichiers du projet Power BI (.pbip)** : disponibles **sur demande** (voir [Contact](#contact)).
 
-## Transparence sur l'usage de l'IA
-
-Projet construit avec **assistance IA** (génération de code, documentation). La conception, les choix de modélisation, la validation des résultats et les recommandations sont de mon fait.
 
 ## Contact
 
