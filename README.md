@@ -112,7 +112,7 @@ Projet construit avec **assistance IA** (génération de code, documentation). L
 ## Contact
 
 - E-mail : williammengo79@gmail.com
-- Portfolio : [william-mbozoo.me](https://william-mbozoo.me)
+- Portfolio : [william-mbozoo.me](https://www.william-mbozoo.me/itsm)
 - LinkedIn : *https://www.linkedin.com/in/william-mbozoo/*
 
 Licence : MIT
