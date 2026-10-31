@@ -32,7 +32,7 @@
 | **Mesures DAX** | 151, organisées en 10 dossiers |
 | **Modèle** | Schéma en étoile, 1 table de faits, 6 dimensions |
 
-![Vue d'ensemble](docs/screenshots/01_apercu.png)
+![Vue d'ensemble](docs/screenshots/00_apercu.png)
 
 ## Problème métier
 
