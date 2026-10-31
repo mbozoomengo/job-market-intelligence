@@ -61,3 +61,13 @@ Job_Market_Intelligence_Cameroon.SemanticModel/
 Job_Market_Intelligence_Cameroon.pbip
 _brief/
 _build/
+
+# Fichiers projet Power BI (jamais versionnés)
+*.pbip
+*.pbix
+*.SemanticModel/
+*.Report/
+_brief/
+_build/
+.pbi/
+*.abf
